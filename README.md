@@ -73,7 +73,10 @@
 
 ## App UI using TKinter
 - **Selection Window**:
-![Selection window]
+- ![](Assets/ui.png)
+- - **Detecting and applying mask**:
+   <img src="Assets/Happy_face.png" width=250 height=200>
+   <img src="Assets/neutral_face.png" width=250 height=200>
 
 
 ## Future Improvements  
