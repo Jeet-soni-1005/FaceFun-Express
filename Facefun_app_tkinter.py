@@ -10,7 +10,7 @@ loaded_model = joblib.load('emotion_detection_model.pkl')
 
 # Load overlay images (goggles and Santa hat)
 goggles = cv2.imread('goggles.png', cv2.IMREAD_UNCHANGED)
-santa_hat = cv2.imread('cap.png', cv2.IMREAD_UNCHANGED)
+cap = cv2.imread('cap.png', cv2.IMREAD_UNCHANGED)
 
 # Global variables for controlling the video feed
 running = False
@@ -77,10 +77,10 @@ def emotion_detection():
 
                     # Santa Hat Placement
                     hat_width = int((face_width) * 1.45)
-                    hat_height = int((hat_width * santa_hat.shape[0] / santa_hat.shape[1]))  # Maintain aspect ratio
+                    hat_height = int((hat_width * cap.shape[0] / cap.shape[1]))  # Maintain aspect ratio
                     hat_x = int(start_x-50)
                     hat_y = int(start_y - hat_height*0.6)  # Slight overlap with forehead
-                    add_overlay(frame, santa_hat, (hat_x, hat_y), (hat_width, hat_height))
+                    add_overlay(frame, cap, (hat_x, hat_y), (hat_width, hat_height))
 
                 # Draw bounding box around the face
                 cv2.rectangle(frame, (start_x, start_y), (end_x, end_y), (0, 255, 0), 2)
