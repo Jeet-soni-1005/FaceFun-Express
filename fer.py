@@ -1,10 +1,14 @@
 import cv2
-from keras.models import load_model
+import tensorflow as tf
+from tensorflow import keras
+from keras import models
+from tensorflow.keras.models import load_model 
 import numpy as np
-
+print(tf.__version__)
+print(keras.__version__)
 model = load_model('mlproj.h5') 
 
-emotion_labels = {0: 'Happy', 1: 'Disgust', 2: 'Fear', 3: 'A', 4: 'SAD', 5: 'Surprise', 6: 'Neutral'}
+emotion_labels = {0:'anger', 1:'disgust', 2:'fear', 3:'happiness', 4: 'sadness', 5: 'surprise', 6: 'neutral'}
 
 cap = cv2.VideoCapture(0)
 
@@ -32,6 +36,7 @@ while True:
         reshaped_face = np.reshape(normalized_face, (1, 48, 48, 1))
      
         predictions = model.predict(reshaped_face)
+        print(f'Raw predictions: {predictions}')
         emotion_label = emotion_labels[np.argmax(predictions)]
         
         # Overlay the emotion label on the frame
