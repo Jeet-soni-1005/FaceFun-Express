@@ -5,22 +5,24 @@ import numpy as np
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import matplotlib.pyplot as plt
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import *
+from tensorflow import keras
+from keras.models import Sequential
+#from keras.models import Sequential
+from keras.layers import *
 from sklearn.metrics import confusion_matrix
 from mlxtend.plotting import plot_confusion_matrix
 import scikitplot
 import seaborn as sns
-import keras
 from keras import models
-from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
-from keras.optimizers import RMSprop,Adam
+from keras.layers import (Dense, Dropout, Flatten, Conv2D, MaxPooling2D, Input, BatchNormalization)
+#from tensorflow.keras.layers import BatchNormalization
+from tensorflow.keras.optimizers import RMSprop,Adam
 from tensorflow.keras.optimizers import SGD
-from keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical
 #from keras.preprocessing.image import ImageDataGenerator
-data = pd.read_csv("./icml_face_data.csv")
+data = pd.read_csv("fer2013.csv")
 print(data)
-
+print(data.emotion)
 def plot_all_emotions():
     fig, axs = plt.subplots(1, 7, figsize=(30, 12))
     fig.subplots_adjust(hspace = .2, wspace=.2)
@@ -38,7 +40,7 @@ def prepare_data(data):
     image_label = np.array(list(map(int, data['emotion'])))
     
     for i, row in enumerate(data.index):
-        image = np.fromstring(data.loc[row, ' pixels'], dtype=int, sep=' ')
+        image = np.fromstring(data.loc[row, 'pixels'], dtype=int, sep=' ')
         image = np.reshape(image, (48, 48))
         image_array[i] = image
         
@@ -73,7 +75,7 @@ emotion_label_to_text = {0:'anger', 1:'disgust', 2:'fear', 3:'happiness', 4: 'sa
 
 # Exploring the count of emotion 
 print(data.emotion.value_counts())
-class_weight = dict(zip(range(0, 7), (((data[data[' Usage']=='Training']['emotion'].value_counts()).sort_index())/len(data[data[' Usage']=='Training']['emotion'])).tolist()))
+class_weight = dict(zip(range(0, 7), (((data[data['Usage']=='Training']['emotion'].value_counts()).sort_index())/len(data[data['Usage']=='Training']['emotion'])).tolist()))
 print(class_weight)
 
 
@@ -84,9 +86,9 @@ from imblearn.pipeline import Pipeline
 from collections import Counter
 
 emotions = {0: 'Angry', 1: 'Disgust', 2: 'Fear', 3: 'Happy', 4: 'Sad', 5: 'Surprise', 6: 'Neutral'}
-train_image_array, train_image_label = prepare_data(data[data[' Usage']=='Training'])
-val_image_array, val_image_label = prepare_data(data[data[' Usage']=='PrivateTest'])
-test_image_array, test_image_label = prepare_data(data[data[' Usage']=='PublicTest'])
+train_image_array, train_image_label = prepare_data(data[data['Usage']=='Training'])
+val_image_array, val_image_label = prepare_data(data[data['Usage']=='PrivateTest'])
+test_image_array, test_image_label = prepare_data(data[data['Usage']=='PublicTest'])
 pp = Pipeline([('tk',TomekLinks()),('ros',RandomOverSampler(random_state=0))])
 train_image_array, train_image_label = pp.fit_resample(train_image_array.reshape(train_image_array.shape[0],48*48), train_image_label)
 print(Counter(train_image_label))
@@ -115,7 +117,7 @@ plot_all_emotions()
 
 #[4]Building the model
 model = Sequential([
-    Conv2D(32, (3,3), activation = 'relu', padding = 'same', input_shape = (48,48,1)),
+    Conv2D(32, (3,3), activation = 'relu', padding = 'same', input_shape=(48, 48, 1)), 
     Conv2D(32, (3,3), activation = 'relu', padding = 'same'),
     MaxPooling2D(2,2),
     Dropout(0.25),
@@ -153,7 +155,8 @@ history = model.fit(train_images, train_labels,
                     validation_data=(val_images, val_labels),
                     class_weight = class_weight,
                     epochs=20,
-                    batch_size=64)
+                    batch_size=32,
+                    verbose=1)
 
 test_loss, test_acc = model.evaluate(test_images, test_labels)
 print('test accuracy:', test_acc)
